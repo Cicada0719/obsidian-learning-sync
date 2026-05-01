@@ -56,7 +56,10 @@ Optional:
 
 ```bash
 python scripts/write_learning_note.py --vault "<vault path>" --project "<project name>" --title "<note title>" --folder "Codex Learning" --content-file "<temp note.md>"
+python scripts/write_learning_note.py --vault "<vault path>" --project "<project name>" --title "<note title>" --folder "Learning/Projects" --content-file "<temp note.md>"
 ```
+
+`--folder` may be a single folder, a nested relative path inside the vault, or an absolute path that is inside the vault.
 
 The script writes to:
 
@@ -66,4 +69,3 @@ Codex Learning/<project-name>/Index.md
 ```
 
 It prints JSON with `vault_path`, `vault_source`, `note_path`, `index_path`, and `wikilink`.
-

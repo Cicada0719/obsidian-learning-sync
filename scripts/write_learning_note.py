@@ -41,6 +41,29 @@ def safe_slug(value: str) -> str:
     return segment.strip("-") or "note"
 
 
+def safe_folder_path(value: str, vault: Path, fallback: str = "Codex Learning") -> Path:
+    raw = (value or fallback).strip()
+    folder = Path(raw)
+    if folder.is_absolute():
+        resolved = folder.expanduser().resolve()
+        try:
+            folder = resolved.relative_to(vault)
+        except ValueError as exc:
+            raise ValueError(f"Folder path must be inside the vault: {resolved}") from exc
+
+    safe_parts: list[str] = []
+    for part in folder.parts:
+        if part in ("", "."):
+            continue
+        if part == "..":
+            raise ValueError("Folder path cannot contain '..'")
+        safe_parts.append(safe_segment(part, fallback="folder"))
+
+    if not safe_parts:
+        safe_parts.append(safe_segment(fallback, fallback="Codex Learning"))
+    return Path(*safe_parts)
+
+
 def unique_note_path(project_dir: Path, timestamp: str, slug: str) -> Path:
     candidate = project_dir / f"{timestamp}-{slug}.md"
     counter = 2
@@ -175,9 +198,14 @@ def main(argv: list[str]) -> int:
         )
         return 2
 
-    folder_segment = safe_segment(args.folder, fallback="Codex Learning")
+    try:
+        folder_path = safe_folder_path(args.folder, vault)
+    except ValueError as exc:
+        print(json.dumps({"error": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        return 2
+
     project_segment = safe_segment(args.project, fallback="Project")
-    project_dir = vault / folder_segment / project_segment
+    project_dir = vault / folder_path / project_segment
     project_dir.mkdir(parents=True, exist_ok=True)
 
     now = dt.datetime.now().astimezone()
@@ -209,4 +237,3 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-

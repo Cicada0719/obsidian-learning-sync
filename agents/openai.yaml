@@ -1,0 +1,5 @@
+interface:
+  display_name: "Obsidian Learning Sync"
+  short_description: "Sync beginner learning notes to Obsidian."
+  default_prompt: "Use $obsidian-learning-sync after this task to write a beginner-friendly Obsidian learning note about the core design and architecture."
+
